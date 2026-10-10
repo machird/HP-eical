@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="えいCal HP">
+    
+    <!-- アプリタイトル・アイコン・PWA設定 -->
+    <title>えいCal (HP版) - 栄養計算＆必要量比較 (2025基準対応)</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    
+    <style>
+        :root {
+            --primary: #1e293b;
+            --primary-light: #f1f5f9;
+            --secondary: #0d9488;
+            --secondary-light: #f0fdfa;
+            --accent: #d97706;
+            --accent-light: #fef3c7;
+            --danger: #e11d48;
+            --danger-light: #fff1f2;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --border: #cbd5e1;
+            --text-main: #334155;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+            background-color: #f8fafc;
+            color: var(--text-main);
+            margin: 0;
+            padding: 8px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 840px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 6px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 21px;
+            margin: 0 0 2px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .section {
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background-color: #fdfdfd;
+        }
+
+        .section h2 {
+            margin-top: 0;
+            font-size: 16px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-left: 4px solid var(--secondary);
+            padding-left: 8px;
+        }
+        
+        .helper-btn {
+            width: 100%;
+            background-color: #059669;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .helper-box {
+            background-color: #ecfdf5;
+            border: 1px dashed #059669;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-group-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group-col label {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .form-group-col input, .form-group-col select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: #fff;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .form-group-col input:focus, .form-group-col select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+        }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            margin-bottom: 10px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--primary);
+        }
+
+        .form-group select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            width: 100%;
+            background-color: #fff;
+        }
+
+        .input-sub-section {
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .input-sub-section h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .base-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .base-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .base-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .category-title {
+            font-weight: bold;
+            width: 110px;
+        }
+
+        .select-full {
+            width: 100%;
+            max-width: 380px;
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fff;
+        }
+
+        .select-ratio {
+            width: 100%;
+            max-width: 130px;
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fff;
+        }
+        .dynamic-rows-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dynamic-row {
+            display: grid;
+            grid-template-columns: 1fr 100px 130px 40px;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-add {
+            background-color: var(--primary-light);
+            color: var(--secondary);
+            border: 1px dashed var(--secondary);
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.15s;
+        }
+        .btn-add:hover {
+            background-color: var(--secondary-light);
+        }
+
+        .btn-delete {
+            background-color: transparent;
+            color: var(--danger);
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-delete:hover {
+            background-color: var(--danger-light);
+            border-radius: 4px;
+        }
+
+        .free-input-container {
+            display: grid;
+            grid-template-columns: 1fr 100px 130px;
+            gap: 8px;
+            align-items: center;
+        }
+        .free-values {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .input-free-num {
+            width: 70px;
+            padding: 5px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: right;
+        }
+        .req-summary {
+            font-size: 13px;
+            margin-top: 10px;
+            color: var(--text-muted);
+            background-color: var(--primary-light);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .action-area {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        button.main-btn {
+            border: none;
+            padding: 10px 16px;
+            font-size: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-calc {
+            background-color: var(--secondary);
+            color: #ffffff;
+            box-shadow: 0 2px 4px -1px rgba(13, 148, 136, 0.1);
+        }
+        .btn-calc:hover {
+            background-color: #0f766e;
+        }
+
+        .btn-reset {
+            background-color: #cbd5e1;
+            color: var(--primary);
+        }
+        .btn-reset:hover {
+            background-color: #94a3b8;
+        }
+
+        .result-box {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid var(--secondary);
+            margin-top: 12px;
+        }
+
+        .result-box h3 {
+            margin-top: 0;
+            color: var(--primary);
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .result-card-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--primary-light);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+
+        .result-row .lbl {
+            font-size: 13px;
+            color: var(--text-main);
+        }
+
+        .result-row .val {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .badge-pill {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        .badge-good { background-color: var(--success-light); color: var(--success); }
+        .badge-warn { background-color: var(--accent-light); color: var(--accent); }
+        .badge-info { background-color: #e0f2fe; color: #0369a1; }
+
+        .evidence-card {
+            grid-column: span 2;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 4px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .evidence-title {
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+        .evidence-title span.badge {
+            background-color: var(--secondary);
+            color: #ffffff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .evidence-list {
+            margin: 6px 0 0 0;
+            padding-left: 18px;
+            color: var(--text-main);
+        }
+        .evidence-list li {
+            margin-bottom: 4px;
+        }
+        .evidence-list strong {
+            color: var(--primary);
+        }
+
+        .progress-container {
+            margin: 6px 0 4px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--primary-light);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--secondary);
+            border-radius: 3px;
+            transition: width 0.4s ease-out;
+        }
+
+        .result-highlight {
+            grid-column: span 2;
+            background: #ffffff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .result-highlight-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .result-highlight .result-row .lbl { font-size: 14px; }
+        .result-highlight .result-row .val { font-size: 18px; }
+
+        .diff-pos { color: var(--danger) !important; } 
+        .diff-neg { color: #2563eb !important; } 
+        .diff-zero { color: var(--success) !important; }
+        .val-empty { color: #94a3b8 !important; font-weight: normal !important; }
+
+        .btn-copy {
+            background-color: var(--success);
+            color: white;
+            margin-top: 12px;
+            width: 100%;
+            padding: 10px 16px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px -1px rgba(5, 150, 105, 0.1);
+        }
+        .btn-copy:hover {
+            background-color: #047857;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #334155;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            transition: bottom 0.25s ease-out, opacity 0.25s;
+            opacity: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toast.show { bottom: 20px; opacity: 1; }
+        .toast.error { background-color: var(--danger); }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(1px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #ffffff;
+            padding: 18px;
+            border-radius: 10px;
+            max-width: 340px;
+            width: 85%;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.15s ease-out;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-title { font-weight: bold; font-size: 15px; margin-bottom: 8px; color: var(--primary); }
+        .modal-body { font-size: 13px; color: var(--text-main); margin-bottom: 16px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .btn-modal-cancel { background-color: var(--primary-light); color: var(--text-main); padding: 8px 14px; font-size: 13px; border-radius: 6px; border:none; cursor:pointer;}
+        .btn-modal-confirm { background-color: var(--danger); color: #ffffff; padding: 8px 14px; font-size: 13px; border-radius: 6px; border:none; cursor:pointer;}
+
+        @media screen and (max-width: 600px) {
+            body { padding: 4px; }
+            .container { padding: 10px; }
+            h1 { font-size: 18px; }
+            .info-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .form-group { grid-template-columns: 1fr; gap: 2px; }
+            .select-full, .select-ratio { max-width: 100%; }
+            .dynamic-row {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                border: 1px solid var(--border);
+                padding: 8px;
+                border-radius: 8px;
+                background-color: #fafbfc;
+                position: relative;
+            }
+            .btn-delete { position: absolute; top: 4px; right: 4px; }
+            .free-input-container {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                border: 1px solid var(--border);
+                padding: 8px;
+                border-radius: 8px;
+                background-color: #fafbfc;
+            }
+            .result-grid { grid-template-columns: 1fr; gap: 10px; }
+            .result-highlight { grid-column: span 1; }
+            .action-area { grid-template-columns: 1fr; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🩺 えいCal (HP版) <span style="font-size:11px; font-weight:normal; background:var(--secondary); color:#fff; padding:2px 6px; border-radius:4px; vertical-align: middle; margin-left: 4px;">2025基準対応</span></h1>
+        <p class="app-subtitle">Ganpule式 (2018) / 食事摂取基準2025 / 褥瘡アセスメント / PFC適正調和</p>
+    </header>
+
+    <!-- 1. 患者基本情報＆病態評価 -->
+    <div class="section">
+        <h2>1. 患者基本情報＆病態評価</h2>
+
+        <!-- 身体推計アコーディオン -->
+        <button type="button" class="helper-btn" onclick="toggleHelper()">
+            <span>📏 身長・体重が測れない場合（推計ツール）</span>
+            <span id="helper-arrow">▼</span>
+        </button>
+        
+        <div id="helper-box" class="helper-box" style="display: none;">
+            <div style="font-weight: bold; color: #065f46; margin-bottom: 6px; text-align: center;">メジャー計測値から自動推定</div>
+            <div class="info-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 6px;">
+                <div class="form-group-col">
+                    <label>膝高 (cm)</label>
+                    <input type="number" id="kneeHeight" placeholder="例: 48" step="0.1">
+                </div>
+                <div class="form-group-col">
+                    <label>下腿周囲長 CC (cm)</label>
+                    <input type="number" id="calfCircum" placeholder="例: 30" step="0.1">
+                </div>
+                <div class="form-group-col">
+                    <label>上腕周囲長 AC (cm)</label>
+                    <input type="number" id="armCircum" placeholder="例: 24" step="0.1">
+                </div>
+            </div>
+            <button type="button" onclick="estimateBody()" style="width: 100%; background: #047857; color: white; border: none; padding: 6px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                推定値をメインフォームへ反映
+            </button>
+        </div>
+
+        <div class="info-grid">
+            <div class="form-group-col">
+                <label for="gender">性別 <span style="color:red">*</span></label>
+                <select id="gender" onchange="autoCalc()">
+                    <option value="">-選択-</option>
+                    <option value="1">男性</option>
+                    <option value="2">女性</option>
+                </select>
+            </div>
+            <div class="form-group-col">
+                <label for="age">年齢 (歳) <span style="color:red">*</span></label>
+                <input type="number" id="age" value="" placeholder="例: 75" min="0" max="150" oninput="autoCalc()">
+            </div>
+            <div class="form-group-col">
+                <label for="height">身長 (cm)</label>
+                <input type="number" id="height" value="" placeholder="空欄可" min="0" step="0.1" oninput="autoCalc()">
+            </div>
+            <div class="form-group-col">
+                <label for="weight">現在体重 (kg)</label>
+                <input type="number" id="weight" value="" placeholder="空欄可" min="0" step="0.1" oninput="autoCalc()">
+            </div>
+        </div>
+
+        <!-- 拡張された活動レベル (1.0 〜 1.5) -->
+        <div class="form-group">
+            <label for="activity">身体活動レベル <span style="color:red">*</span></label>
+            <select id="activity" onchange="autoCalc()">
+                <option value="1.0">1.0 (絶対安静・完全寝たきり)</option>
+                <option value="1.1">1.1 (寝たきり・ベッド上中心)</option>
+                <option value="1.2" selected>1.2 (車椅子・室内移動・座位中心)</option>
+                <option value="1.3">1.3 (日常生活活動・軽運動・家事)</option>
+                <option value="1.4">1.4 (中等度活動・約1時間のリハビリ)</option>
+                <option value="1.5">1.5 (高い活動度・2時間以上の積極的運動)</option>
+            </select>
+        </div>
+
+        <!-- 拡張されたストレス係数 (1.0 〜 1.5) -->
+        <div class="form-group">
+            <label for="stress">ストレス係数 <span style="color:red">*</span></label>
+            <select id="stress" onchange="autoCalc()">
+                <option value="1.0" selected>1.0 (健康・安定・侵襲なし)</option>
+                <option value="1.1">1.1 (軽度・微熱・小手術・軽度感染症)</option>
+                <option value="1.2">1.2 (中等度・発熱・骨折・中手術・軽度褥瘡)</option>
+                <option value="1.3">1.3 (高度・難治性創傷・腹膜炎・重症感染症)</option>
+                <option value="1.4">1.4 (重度・大手術・多発外傷・敗血症)</option>
+                <option value="1.5">1.5 (極度・広範囲熱傷・超高侵襲状態)</option>
+            </select>
+        </div>
+
+        <!-- 褥瘡評価項目 -->
+        <div class="form-group">
+            <label for="bedsore_grade">褥瘡評価</label>
+            <select id="bedsore_grade" onchange="autoCalc()">
+                <option value="none" selected>なし</option>
+                <option value="mild">浅い褥瘡 (Ⅰ・Ⅱ度)</option>
+                <option value="severe">深い褥瘡 (Ⅲ・Ⅳ度)</option>
+            </select>
+        </div>
+        
+        <div class="req-summary">
+            <div>標準体重(BMI22): <strong id="ibw_val">-</strong> kg</div>
+            <div>基礎代謝(Ganpule2018): <strong id="bmr_val">-</strong> kcal</div>
+            <div>採用計算体重: <strong id="basew_val">-</strong> kg <span id="weight_type_lbl" style="font-size:11px; color:var(--secondary);">(判定前)</span></div>
+        </div>
+    </div>
+
+    <!-- 2. 摂取内容の入力 -->
+    <div class="section">
+        <h2>2. 摂取内容の入力 (1日当たりの平均換算)</h2>
+        <!-- 2-1. 基本食事・経管栄養 -->
+        <div class="input-sub-section" style="border-left: 4px solid var(--primary);">
+            <h3>基本食事・経管栄養</h3>
+            <table class="base-table">
+                <tr class="row-main">
+                    <td class="category-title">🍱 主食</td>
+                    <td><select id="main_food" class="select-full" onchange="autoCalc()"><option value="">-- 選択なし --</option></select></td>
+                    <td style="width:140px;"><select id="main_ratio" class="select-ratio" onchange="autoCalc()">
+                        <option value="0">0割</option><option value="1">1割</option><option value="2">2割</option><option value="3">3割</option><option value="4">4割</option><option value="5">5割</option><option value="6">6割</option><option value="7">7割</option><option value="8">8割</option><option value="9">9割</option><option value="10" selected>10割</option>
+                    </select></td>
+                </tr>
+                <tr class="row-sub">
+                    <td class="category-title">🥗 副食</td>
+                    <td><select id="sub_food" class="select-full" onchange="autoCalc()"><option value="">-- 選択なし --</option></select></td>
+                    <td><select id="sub_ratio" class="select-ratio" onchange="autoCalc()">
+                        <option value="0">0割</option><option value="1">1割</option><option value="2">2割</option><option value="3">3割</option><option value="4">4割</option><option value="5">5割</option><option value="6">6割</option><option value="7">7割</option><option value="8">8割</option><option value="9">9割</option><option value="10" selected>10割</option>
+                    </select></td>
+                </tr>
+                <tr class="row-tube">
+                    <td class="category-title" style="color: #be185d;">🧪 経管栄養</td>
+                    <td><select id="tube_food" class="select-full" onchange="autoCalc()"><option value="">-- 選択なし --</option></select></td>
+                    <td><select id="tube_pack" class="select-ratio" onchange="autoCalc()">
+                        <option value="0" selected>0パック</option><option value="0.5">0.5P (1/2)</option><option value="1">1パック</option><option value="1.5">1.5パック</option><option value="2">2パック</option><option value="2.5">2.5パック</option><option value="3">3パック</option><option value="3.5">3.5パック</option><option value="4">4パック</option><option value="4.5">4.5パック</option><option value="5">5パック</option>
+                    </select></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 2-2. 補食 (ONS) -->
+        <div class="input-sub-section" style="border-left: 4px solid var(--accent);">
+            <h3>🥤 補食 (ONS) <button class="btn-add" onclick="addDynamicRow('ons-container', supplementFoods)">＋ 追加</button></h3>
+            <div id="ons-container" class="dynamic-rows-container"></div>
+        </div>
+
+        <!-- 2-3. 輸液 -->
+        <div class="input-sub-section" style="border-left: 4px solid #0369a1;">
+            <h3>💉 輸液 <button class="btn-add" onclick="addDynamicRow('iv-container', ivFoods)">＋ 追加</button></h3>
+            <div id="iv-container" class="dynamic-rows-container"></div>
+        </div>
+        
+        <!-- 2-4. その他 (フリー入力) -->
+        <div class="input-sub-section" style="border-left: 4px solid var(--success);">
+            <h3>📝 その他 (任意フリー入力)</h3>
+            <div class="free-input-container">
+                <div class="free-values">
+                    <span>E:</span><input type="number" id="free_e" class="input-free-num" placeholder="0" min="0" oninput="autoCalc()"> <span style="font-size:12px;color:var(--text-muted);">kcal</span>
+                    <span style="margin-left:6px;">P:</span><input type="number" id="free_p" class="input-free-num" placeholder="0.0" min="0" step="0.1" oninput="autoCalc()"> <span style="font-size:12px;color:var(--text-muted);">g</span>
+                </div>
+                <div>
+                    <select id="free_count" class="select-ratio" style="max-width:100%;" onchange="autoCalc()">
+                        <option value="0">0倍 (オフ)</option><option value="1" selected>1倍</option><option value="2">2倍</option><option value="3">3倍</option><option value="4">4倍</option><option value="5">5倍</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="free_freq" class="select-ratio" style="max-width:100%;" onchange="autoCalc()">
+                        <option value="1" selected>毎日</option>
+                        <option value="0.4286">週3回 (3/7)</option>
+                        <option value="0.2857">週2回 (2/7)</option>
+                        <option value="0.1429">週1回 (1/7)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- アクションボタンエリア -->
+    <div class="action-area">
+        <button class="main-btn btn-calc" onclick="calculateAll(false)">⚡ 計算・判定する</button>
+        <button class="main-btn btn-reset" onclick="confirmReset()">🔄 クリア</button>
+    </div>
+
+    <!-- 結果表示ボード -->
+    <div class="result-box">
+        <h3>📊 栄養判定・比較ダッシュボード</h3>
+        <div class="result-grid">
+            <!-- 必要量カード -->
+            <div class="result-card">
+                <div class="result-card-title">🔵 患者の1日必要目標量</div>
+                <div class="result-row"><span class="lbl">必要エネルギー</span><span class="val val-empty" id="res_req_e">- kcal</span></div>
+                <div class="result-row"><span class="lbl">必要たんぱく質</span><span class="val val-empty" id="res_req_p">- g</span></div>
+                <div class="result-row"><span class="lbl">タンパクエネルギー比 (%P)</span><span class="val val-empty" id="res_req_pct_p">- %</span></div>
+                <div class="result-row"><span class="lbl">参考NPC/N比 (代謝指標)</span><span class="val val-empty" id="res_npcn">-</span></div>
+                <div class="result-row"><span class="lbl">必要水分量</span><span class="val val-empty" id="res_req_w">- mL</span></div>
+                <p style="font-size:10px; color:var(--text-muted); margin: 4px 0 0 0; text-align:right;">※%Pは厚労省基準(13〜20%)で適正調和。NPC/N比は代謝バランス目安です</p>
+            </div>
+
+            <!-- 摂取量カード -->
+            <div class="result-card">
+                <div class="result-card-title">🟢 実際の1日平均摂取量</div>
+                <div class="result-row"><span class="lbl">摂取エネルギー</span><span class="val val-empty" id="res_e">- kcal</span></div>
+                <div class="result-row"><span class="lbl">摂取たんぱく質</span><span class="val val-empty" id="res_p">- g</span></div>
+                <div class="result-row"><span class="lbl">摂取タンパク比 (%P)</span><span class="val val-empty" id="res_intake_pct_p">- %</span></div>
+                
+                <!-- 充足率バー -->
+                <div class="progress-container">
+                    <div class="progress-header"><span>エネルギー充足率</span><span id="rate_e_lbl">0%</span></div>
+                    <div class="progress-bar-bg"><div id="bar_e" class="progress-bar-fill"></div></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header"><span>たんぱく質充足率</span><span id="rate_p_lbl">0%</span></div>
+                    <div class="progress-bar-bg"><div id="bar_p" class="progress-bar-fill"></div></div>
+                </div>
+            </div>
+
+            <!-- 差分/判定結果 -->
+            <div class="result-highlight">
+                <div class="result-highlight-title">⚖️ 必要目標量との過不足判定 (1日平均換算)</div>
+                <div class="result-row"><span class="lbl" style="font-weight: 600;">⚡ 必要エネルギーとの過不足</span><span class="val val-empty" id="res_diff_e">- kcal</span></div>
+                <div class="result-row" style="margin-bottom: 0;"><span class="lbl" style="font-weight: 600;">🥩 必要たんぱく質との過不足</span><span class="val val-empty" id="res_diff_p">- g</span></div>
+            </div>
+
+            <!-- 参照基準・エビデンス表示用カード -->
+            <div class="evidence-card" id="evidence_card">
+                <div class="evidence-title" onclick="toggleEvidence()">
+                    <span>📚 適用されたガイドライン・算出根拠</span>
+                    <span class="badge" id="evidence_toggle_lbl">詳細表示 ▼</span>
+                </div>
+                <div id="evidence_body" style="display:none; margin-top:8px; border-top:1px dashed var(--border); padding-top:8px;">
+                    <ul class="evidence-list" id="evidence_items">
+                        <li><strong>基礎代謝量:</strong> Ganpuleの式（2018年最新改訂版）</li>
+                        <li><strong>体格基準:</strong> 食事摂取基準2025（70歳以上BMI<20.0をやせ判定 / BMI≥30補正体重）</li>
+                        <li><strong>タンパク保護:</strong> 低体重（フレイルリスク）対象者への1.2g/kg以上自動引き上げ</li>
+                        <li><strong>未入力補完:</strong> 未入力時は食事摂取基準2025のEER参照値および参照体格を自動適用</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size: 10px; color: var(--text-muted); text-align: left; margin: 6px 0 0 0;">
+            ※過不足表示：プラス(＋)は過剰または目標クリア、マイナス(－)は不足を意味します。
+        </p>
+        
+        <!-- カルテコピーボタン -->
+        <button class="btn-copy" onclick="copyResults()">📋 判定結果をコピーしてカルテに貼る</button>
+    </div>
+</div>
+
+<!-- カスタムトースト通知 -->
+<div id="custom-toast" class="toast"><span id="toast-icon">✨</span> <span id="toast-message">メッセージ</span></div>
+
+<!-- 確認ダイアログ -->
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-title">入力のリセット</div>
+        <div class="modal-body" id="confirm-message">すべての入力内容と計算結果をリセットしてもよろしいですか？</div>
+        <div class="modal-buttons">
+            <button class="btn-modal-cancel" onclick="closeConfirmModal(false)">キャンセル</button>
+            <button class="btn-modal-confirm" onclick="closeConfirmModal(true)">リセットする</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 食事摂取基準2025正式参照データ
+    const DRI_2025_REF = [
+        { ageMin: 18, ageMax: 29, mH: 171.5, mW: 66.4, mEer: 2650, fH: 158.0, fW: 51.9, fEer: 2000 },
+        { ageMin: 30, ageMax: 49, mH: 171.0, mW: 70.0, mEer: 2700, fH: 157.8, fW: 53.9, fEer: 2050 },
+        { ageMin: 50, ageMax: 64, mH: 167.3, mW: 68.3, mEer: 2600, fH: 154.5, fW: 54.3, fEer: 1950 },
+        { ageMin: 65, ageMax: 74, mH: 165.0, mW: 65.0, mEer: 2400, fH: 152.0, fW: 54.0, fEer: 1850 },
+        { ageMin: 75, ageMax: 999, mH: 161.0, mW: 58.5, mEer: 2050, fH: 147.0, fW: 48.0, fEer: 1550 }
+    ];
+
+    function getDriReference(age, gender) {
+        const row = DRI_2025_REF.find(r => age >= r.ageMin && age <= r.ageMax) || DRI_2025_REF[DRI_2025_REF.length - 1];
+        const isMale = (gender === 1 || gender === "1");
+        return {
+            refHeight: isMale ? row.mH : row.fH,
+            refWeight: isMale ? row.mW : row.fW,
+            refEer: isMale ? row.mEer : row.fEer
+        };
+    }
+
+    // 食品マスタ
+    const mainFoods = [{"name": "米飯110", "e": 510.0, "p": 9.1}, {"name": "米飯130", "e": 610.0, "p": 10.8}, {"name": "米飯160", "e": 720.0, "p": 12.6}, {"name": "米飯200", "e": 920.0, "p": 16.4}, {"name": "米飯230", "e": 1020.0, "p": 18.3}, {"name": "全粥100（+粉飴）", "e": 330.0, "p": 3.6}, {"name": "全粥ハーフ100", "e": 380.0, "p": 13.6}, {"name": "全粥200（+粉飴）", "e": 540.0, "p": 7.2}, {"name": "全粥250（+粉飴）", "e": 640.0, "p": 9.0}, {"name": "3分粥（100）", "e": 100.0, "p": 1.5}, {"name": "5分粥（100）", "e": 130.0, "p": 2.1}, {"name": "7分粥（200）", "e": 320.0, "p": 5.4}, {"name": "重湯（150）", "e": 87.0, "p": 1.3}, {"name": "流動食", "e": 830.0, "p": 30.5}, {"name": "ハーフ米飯50", "e": 280.0, "p": 14.2}, {"name": "ハーフ米飯100", "e": 510.0, "p": 18.3}, {"name": "ハーフ全粥100", "e": 480.0, "p": 13.6}, {"name": "MIX60", "e": 476.2, "p": 7.1}, {"name": "MIX70", "e": 555.5, "p": 8.3}, {"name": "MIX80", "e": 634.9, "p": 9.5}, {"name": "MIX120", "e": 952.4, "p": 14.2}, {"name": "MIX140", "e": 1111.1, "p": 16.6}, {"name": "ﾊｰﾌMIX40", "e": 360.0, "p": 14.7}, {"name": "ﾊｰﾌMIX60", "e": 520.0, "p": 17.1}, {"name": "ﾊｰﾌMIX70", "e": 600.0, "p": 18.3}, {"name": "うどん200", "e": 228.0, "p": 6.4}, {"name": "ロールパン1個", "e": 98.0, "p": 3.3}];
+    const subFoods = [{"name": "常食", "e": 890.0, "p": 50.0}, {"name": "軟菜食", "e": 860.0, "p": 50.0}, {"name": "膵臓", "e": 710.0, "p": 47.0}, {"name": "5分粥菜", "e": 620.0, "p": 43.0}, {"name": "DM12", "e": 730.0, "p": 47.0}, {"name": "DM14", "e": 830.0, "p": 47.0}, {"name": "DM16", "e": 860.0, "p": 47.0}, {"name": "DM18", "e": 910.0, "p": 50.0}, {"name": "透析Ⅰ", "e": 840.0, "p": 40.0}, {"name": "透析Ⅱ", "e": 880.0, "p": 44.0}, {"name": "透析Ⅲ", "e": 980.0, "p": 50.0}, {"name": "嚥下Ⅲ・Ⅳ", "e": 1110.0, "p": 45.0}, {"name": "嚥下Ⅴ", "e": 760.0, "p": 45.0}];
+    const supplementFoods = [{"name": "メイバランスミニ(125ml)", "e": 200.0, "p": 7.5}, {"name": "メイバランスゼリー(125ml)", "e": 200.0, "p": 7.5}, {"name": "メイバランスアイス(80ml)", "e": 100.0, "p": 3.7}, {"name": "ブリックゼリー(1/3個)", "e": 116.7, "p": 4.0}, {"name": "リーナレンMP(125ml)", "e": 200.0, "p": 7.0}, {"name": "プロッカゼリー(77g)", "e": 80.0, "p": 6.2}, {"name": "CP10ゼリー(80g)", "e": 110.0, "p": 12.0}, {"name": "CP10ジュース(125ml)", "e": 80.0, "p": 12.0}, {"name": "ご飯に合うソース(10g)", "e": 60.0, "p": 0.2}, {"name": "ミニタス エネルギー(25g)", "e": 100.0, "p": 0.0}, {"name": "ミニタス たんぱく(26g)", "e": 40.0, "p": 5.0}, {"name": "sara(125ml)", "e": 200.0, "p": 8.0}, {"name": "アイソカルハイカロリー(66g)", "e": 150.0, "p": 3.0}, {"name": "ビタミンサポートゼリー(78g)", "e": 100.0, "p": 0.0}, {"name": "粉飴10g", "e": 38.0, "p": 0.0}, {"name": "MCTオイル(2.5ml)", "e": 22.5, "p": 0.0}, {"name": "エンシュアH(250ml)", "e": 375.0, "p": 13.2}, {"name": "エネーボ(250ml)", "e": 300.0, "p": 12.0}];
+    const ivFoods = [
+        {"name": "エルネオパ1号(1000mL)", "e": 560.0, "p": 20.0},
+        {"name": "エルネオパ2号(1000mL)", "e": 820.0, "p": 30.0},
+        {"name": "ビーフリード(500mL)", "e": 210.0, "p": 15.0},
+        {"name": "ソルデム3A(500mL)", "e": 86.0, "p": 0.0},
+        {"name": "ヴィーンD(500mL)", "e": 100.0, "p": 0.0},
+        {"name": "イントラリポス20％(100mL)", "e": 200.0, "p": 0.0},
+        {"name": "キドミン(200mL)", "e": 58.0, "p": 14.41},
+        {"name": "ソルデム1(500mL)", "e": 52.0, "p": 0.0},
+        {"name": "ハイカリックRF(500mL)", "e": 1000.0, "p": 0.0}
+    ];
+    const tubeFoods = [
+        {"name": "リーナレンMP", "e": 400.0, "p": 14.0},
+        {"name": "ハイネックスイーゲル 300K", "e": 300.0, "p": 12.0},
+        {"name": "ハイネックスイーゲル 400K", "e": 400.0, "p": 16.0},
+        {"name": "メイグット 400K", "e": 400.0, "p": 16.0},
+        {"name": "イノラス配合経腸用液", "e": 300.0, "p": 12.0},
+        {"name": "イノソリッド配合経腸用半固形剤", "e": 300.0, "p": 13.5}
+    ];
+
+    let confirmCallback = null;
+    let currentResults = null;
+
+    function toggleHelper() {
+        const box = document.getElementById('helper-box');
+        const arrow = document.getElementById('helper-arrow');
+        const isHidden = box.style.display === 'none';
+        box.style.display = isHidden ? 'block' : 'none';
+        arrow.innerText = isHidden ? "▲" : "▼";
+    }
+
+    function estimateBody() {
+        const kh = parseFloat(document.getElementById('kneeHeight').value);
+        const cc = parseFloat(document.getElementById('calfCircum').value);
+        const ac = parseFloat(document.getElementById('armCircum').value);
+        const age = parseFloat(document.getElementById('age').value);
+        const gender = document.getElementById('gender').value;
+
+        if (!gender || !age) {
+            alert("先に「性別」と「年齢」を入力してください。");
+            return;
+        }
+
+        let msg = "";
+        if (kh) {
+            let estHeight = (gender === "1") ? (64.19 + (2.02 * kh) - (0.04 * age)) : (84.88 + (1.83 * kh) - (0.24 * age));
+            const finalH = Math.round(estHeight * 10) / 10;
+            document.getElementById('height').value = finalH;
+            msg += "・身長推計値を入力欄へ挿入しました。\n";
+        }
+
+        if (cc || ac) {
+            let ccVal = cc || (ac * 1.2);
+            let acVal = ac || (cc * 0.8);
+            let calcWeight = (gender === "1") ? ((ccVal * 1.0) + (acVal * 1.5) - 15) : ((ccVal * 0.9) + (acVal * 1.2) - 10);
+            const finalW = Math.max(20, Math.round(calcWeight * 10) / 10);
+            document.getElementById('weight').value = finalW;
+            msg += "・体重推計値を入力欄へ挿入しました。";
+        }
+
+        if (!msg) {
+            alert("膝高、下腿周囲長、上腕周囲長のいずれかを入力してください。");
+        } else {
+            alert(msg);
+            toggleHelper();
+            autoCalc();
+        }
+    }
+
+    function toggleEvidence() {
+        const body = document.getElementById('evidence_body');
+        const lbl = document.getElementById('evidence_toggle_lbl');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            lbl.innerText = '閉じる ▲';
+        } else {
+            body.style.display = 'none';
+            lbl.innerText = '詳細表示 ▼';
+        }
+    }
+
+    function autoCalc() {
+        const gender = document.getElementById('gender').value;
+        const age = document.getElementById('age').value;
+        if (gender && age) {
+            calculateAll(true);
+        }
+    }
+
+    window.onload = function() {
+        initSingleSelect('main_food', mainFoods);
+        initSingleSelect('sub_food', subFoods);
+        initSingleSelect('tube_food', tubeFoods);
+        
+        addDynamicRow('ons-container', supplementFoods);
+        addDynamicRow('iv-container', ivFoods);
+    };
+
+    function initSingleSelect(elementId, dataset) {
+        const select = document.getElementById(elementId);
+        dataset.forEach((food, index) => {
+            let opt = document.createElement('option');
+            opt.value = index;
+            opt.innerHTML = `${food.name} (${food.e}kcal / ${food.p}g)`;
+            select.appendChild(opt);
+        });
+        select.selectedIndex = 0;
+    }
+
+    function addDynamicRow(containerId, dataset) {
+        const container = document.getElementById(containerId);
+        const rowId = 'row_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        
+        const rowDiv = document.createElement('div');
+        rowDiv.id = rowId;
+        rowDiv.className = 'dynamic-row';
+
+        const itemSelect = document.createElement('select');
+        itemSelect.className = 'select-full item-select';
+        itemSelect.onchange = autoCalc;
+        let emptyOpt = document.createElement('option');
+        emptyOpt.value = "";
+        emptyOpt.innerText = "-- 選択なし --";
+        itemSelect.appendChild(emptyOpt);
+        dataset.forEach((food, index) => {
+            let opt = document.createElement('option');
+            opt.value = index;
